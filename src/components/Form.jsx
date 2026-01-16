@@ -7,10 +7,9 @@ const Form = ({ handleSubmit, register, errors, dispatch }) => {
 
   const submitForm = (data) => {
     dispatch({
-      type: "REGISTER_USER",
+      type: "CREATE_ACCOUNT",
       payload: data,
     });
-    localStorage.setItem("currUser", JSON.stringify(data));
     if (data.email && data.password) {
       navigate("/home");
     }

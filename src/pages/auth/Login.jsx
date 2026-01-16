@@ -1,10 +1,12 @@
 import { Link, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { useAuthContext } from "../../context/AuthContext";
+import { useState } from "react";
 
 const Login = () => {
-  const { dispatch } = useAuthContext()
+  const { dispatch, state } = useAuthContext()
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState("");
   const {
     register,
     handleSubmit,
@@ -12,18 +14,35 @@ const Login = () => {
   } = useForm();
 
   const onSubmit = (data) => {
-
     try {
+      setErrorMessage("");
+      
+      // Check if account exists
+      const accountExists = state.registeredAccounts.find(
+        acc => acc.email === data.email
+      );
+      
+      if (!accountExists) {
+        setErrorMessage("Account not found. Please create an account first.");
+        return;
+      }
+      
+      // Verify password
+      if (accountExists.password !== data.password) {
+        setErrorMessage("Incorrect password. Please try again.");
+        return;
+      }
+      
       dispatch({
-        type: "REGISTER_USER",
+        type: "LOGIN_USER",
         payload: data,
       });
-      localStorage.setItem("currUser", JSON.stringify(data));
       if (data.email && data.password) {
         navigate("/home");
       }
     }
     catch (err) {
+      setErrorMessage(err.message || "Login failed. Please try again.");
       console.log(err)
     }
   };
@@ -69,6 +88,12 @@ const Login = () => {
               )}
             </div>
           </div>
+
+          {errorMessage && (
+            <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-sm">
+              {errorMessage}
+            </div>
+          )}
 
           <button
             type="submit"

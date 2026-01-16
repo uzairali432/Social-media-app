@@ -6,6 +6,8 @@ const defaultValue = {
     surName: "",
     gender: "",
     email: "",
+    isLoggedIn: false,
+    registeredAccounts: JSON.parse(localStorage.getItem("registeredAccounts")) || [],
 }
 export const AuthContext = createContext(null)
 
