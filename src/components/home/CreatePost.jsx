@@ -1,5 +1,6 @@
 import { useState } from "react";
 import userImage from '../../assets/user.png'
+import { useAuthContext } from "../../context/AuthContext";
 
 import {
   Card,
@@ -61,6 +62,8 @@ const CreatePost = () => {
   const [open, setOpen] = useState(false);
   const [audience, setAudience] = useState("Friends");
   const [files, setFiles] = useState([])
+  const { state } = useAuthContext();
+  const { firstName, surName } = state;
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const { dispatch: postDispatch } = usePostContext();
@@ -71,7 +74,7 @@ const CreatePost = () => {
       postText,
       files,
       createdAt: new Date().toLocaleString(),
-      createdBy: "Uzair"
+      createdBy: `${firstName} ${surName}`
     };
     postDispatch({ type: "ADD_POST", payload: data })
     setOpen(false)
@@ -220,7 +223,7 @@ const CreatePost = () => {
             value={postText}
             onChange={(e) => setPostText(e.target.value)}
             onClick={handleOpen}
-            placeholder="What's on your mind, Uzair?"
+            placeholder={`What's on your mind, ${firstName}?`}
             className="flex-1 bg-gray-100 rounded-full px-6 py-2 text-gray-700 text-sm focus:outline-none cursor-pointer"
           />
         </div>

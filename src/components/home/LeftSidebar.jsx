@@ -9,10 +9,13 @@ import {
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import userImage from "../../assets/user.png";
+import { useAuthContext } from "../../context/AuthContext";
 
 const LeftSidebar = () => {
   const [showMore, setShowMore] = useState(false);
   const location = useLocation();
+  const { state } = useAuthContext();
+  const { firstName, surName } = state;
 
   const sidebarItems = [
     { to: "/findFriends", icon: <Users />, label: "Friends" },
@@ -30,7 +33,7 @@ const LeftSidebar = () => {
           alt="Profile"
           className="w-10 h-10 rounded-full"
         />
-        <span className="font-semibold text-gray-800">Muhammad Uzair</span>
+        <span className="font-semibold text-gray-800">{firstName} {surName}</span>
       </div>
 
       <div className="mt-3 space-y-1">

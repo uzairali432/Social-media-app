@@ -2,7 +2,7 @@ import { createContext, useContext, useReducer, useState } from "react";
 import reducer from '../reducer/AuthReducer'
 
 const defaultValue = {
-    firstname: "",
+    firstName: "",
     surName: "",
     gender: "",
     email: "",
