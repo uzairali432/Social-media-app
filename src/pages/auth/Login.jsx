@@ -2,48 +2,48 @@ import { Link, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { useAuthContext } from "../../context/AuthContext";
 import { useState } from "react";
+import { authAPI } from "../../services/api";
 
 const Login = () => {
-  const { dispatch, state } = useAuthContext()
+  const { dispatch } = useAuthContext()
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     try {
       setErrorMessage("");
+      setIsLoading(true);
       
-      // Check if account exists
-      const accountExists = state.registeredAccounts.find(
-        acc => acc.email === data.email
-      );
-      
-      if (!accountExists) {
-        setErrorMessage("Account not found. Please create an account first.");
-        return;
-      }
-      
-      // Verify password
-      if (accountExists.password !== data.password) {
-        setErrorMessage("Incorrect password. Please try again.");
-        return;
-      }
+      // Call backend API for login
+      const response = await authAPI.login(data.email, data.password);
       
       dispatch({
         type: "LOGIN_USER",
-        payload: data,
+        payload: {
+          userId: response.data.user._id,
+          firstName: response.data.user.firstName,
+          surName: response.data.user.surName,
+          email: response.data.user.email,
+          token: response.data.token,
+          refreshToken: response.data.refreshToken,
+        },
       });
-      if (data.email && data.password) {
-        navigate("/home");
-      }
+      
+      navigate("/home");
     }
     catch (err) {
-      setErrorMessage(err.message || "Login failed. Please try again.");
-      console.log(err)
+      const errorMsg = err.response?.data?.message || err.message || "Login failed. Please try again.";
+      setErrorMessage(errorMsg);
+      console.error("Login error:", err);
+    }
+    finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -97,9 +97,10 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-92 p-3 border rounded-lg bg-[#0866ff] text-white font-semibold text-xl cursor-pointer"
+            disabled={isLoading}
+            className={`w-92 p-3 border rounded-lg bg-[#0866ff] text-white font-semibold text-xl cursor-pointer ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            Log in
+            {isLoading ? "Logging in..." : "Log in"}
           </button>
 
           <p className="text-center text-[#0866ff] text-sm cursor-pointer">

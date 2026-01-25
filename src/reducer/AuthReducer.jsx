@@ -1,48 +1,58 @@
 const AuthReducer = (state, action) => {
     switch (action.type) {
         case 'CREATE_ACCOUNT':
-            const newAccount = {
-                email: action.payload.email,
-                firstName: action.payload.firstName,
-                surName: action.payload.surName,
-                gender: action.payload.gender,
-                password: action.payload.password,
-            };
-            const updatedAccounts = [...state.registeredAccounts, newAccount];
-            localStorage.setItem("registeredAccounts", JSON.stringify(updatedAccounts));
             return {
                 ...state,
-                ...newAccount,
+                userId: action.payload.userId,
+                firstName: action.payload.firstName,
+                surName: action.payload.surName,
+                email: action.payload.email,
+                token: action.payload.token,
                 isLoggedIn: true,
-                registeredAccounts: updatedAccounts,
-            }
+            };
         case 'LOGIN_USER':
-            const accountExists = state.registeredAccounts.find(
-                acc => acc.email === action.payload.email && acc.password === action.payload.password
-            );
-            if (accountExists) {
-                localStorage.setItem("currUser", JSON.stringify(accountExists));
-                return {
-                    ...state,
-                    ...accountExists,
-                    isLoggedIn: true,
-                }
-            } else {
-                throw new Error("Account not found. Please create an account first.");
+            localStorage.setItem("authToken", action.payload.token);
+            if (action.payload.refreshToken) {
+                localStorage.setItem("refreshToken", action.payload.refreshToken);
             }
-        case 'LOGOUT_USER':
-            localStorage.removeItem("currUser");
             return {
+                ...state,
+                userId: action.payload.userId,
+                firstName: action.payload.firstName,
+                surName: action.payload.surName,
+                email: action.payload.email,
+                token: action.payload.token,
+                isLoggedIn: true,
+            };
+        case 'SET_USER':
+            return {
+                ...state,
+                userId: action.payload.userId,
+                firstName: action.payload.firstName,
+                surName: action.payload.surName,
+                email: action.payload.email,
+                token: action.payload.token,
+                isLoggedIn: true,
+            };
+        case 'LOGOUT_USER':
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("refreshToken");
+            return {
+                userId: "",
                 firstName: "",
                 surName: "",
-                gender: "",
                 email: "",
+                token: "",
                 isLoggedIn: false,
-                registeredAccounts: state.registeredAccounts,
-            }
+            };
+        case 'UPDATE_USER':
+            return {
+                ...state,
+                ...action.payload,
+            };
         default:
-            break;
+            return state;
     }
-}
+};
 
 export default AuthReducer;

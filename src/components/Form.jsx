@@ -1,17 +1,51 @@
 import { months } from "../constant";
 import { Link, useNavigate } from "react-router-dom";
 import ErrorIcon from "@mui/icons-material/Error";
+import { useState } from "react";
+import { authAPI } from "../services/api";
 
 const Form = ({ handleSubmit, register, errors, dispatch }) => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
-  const submitForm = (data) => {
-    dispatch({
-      type: "CREATE_ACCOUNT",
-      payload: data,
-    });
-    if (data.email && data.password) {
+  const submitForm = async (data) => {
+    try {
+      setApiError("");
+      setIsLoading(true);
+
+      // Prepare user data for signup
+      const signupData = {
+        firstName: data.firstName,
+        surName: data.surName,
+        dateOfBirth: `${data.date} ${data.month} ${data.year}`,
+        gender: data.gender,
+        email: data.email,
+        password: data.password,
+      };
+
+      // Call backend API for signup
+      const response = await authAPI.signup(signupData);
+
+      dispatch({
+        type: "CREATE_ACCOUNT",
+        payload: {
+          userId: response.data.user._id,
+          firstName: response.data.user.firstName,
+          surName: response.data.user.surName,
+          email: response.data.user.email,
+          token: response.data.token,
+          refreshToken: response.data.refreshToken,
+        },
+      });
+
       navigate("/home");
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || err.message || "Signup failed. Please try again.";
+      setApiError(errorMsg);
+      console.error("Signup error:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -215,11 +249,17 @@ const Form = ({ handleSubmit, register, errors, dispatch }) => {
           and{" "}
           <span className="text-blue-600 cursor-pointer">Cookies Policy</span>.
         </p>
+        {apiError && (
+          <div className="p-3 mb-4 bg-red-100 border border-red-400 text-red-700 rounded-md text-sm">
+            {apiError}
+          </div>
+        )}
         <button
           type="submit"
-          className="bg-[#42b72a] hover:bg-[#36a420] text-white font-bold py-2 rounded-md text-lg w-1/2 px-14 mx-[25%]"
+          disabled={isLoading}
+          className={`bg-[#42b72a] hover:bg-[#36a420] text-white font-bold py-2 rounded-md text-lg w-1/2 px-14 mx-[25%] ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          Sign Up
+          {isLoading ? "Signing Up..." : "Sign Up"}
         </button>
         <p className="text-center text-blue-600 font-medium mt-3 cursor-pointer">
           <Link to={"/"}>Already have an account?</Link>
