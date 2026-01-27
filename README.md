@@ -50,7 +50,7 @@ Social-media-app/
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js
 - npm installed
 
 ---
@@ -87,7 +87,7 @@ The optimized output will be generated in the dist/ folder.
 
 ---
 
-## 🔌 Backend Integration (Optional)
+## 🔌 Backend Integration
 
 To convert this into a full social media platform:
 - Connect a backend (Node.js, Express, MongoDB, Firebase, etc.)
