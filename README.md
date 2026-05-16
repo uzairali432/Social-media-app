@@ -13,6 +13,7 @@ This project provides a clean, scalable frontend structure for building a modern
 - Routing and page layout support  
 - Reusable UI components  
 - Ready for backend and API integration  
+- Facebook clone 
 
 Note: This project is currently focused on the frontend only. Backend features like authentication, posts, likes, and comments can be added later.
 
@@ -50,7 +51,7 @@ Social-media-app/
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js
 - npm installed
 
 ---
@@ -87,7 +88,7 @@ The optimized output will be generated in the dist/ folder.
 
 ---
 
-## 🔌 Backend Integration (Optional)
+## 🔌 Backend Integration
 
 To convert this into a full social media platform:
 - Connect a backend (Node.js, Express, MongoDB, Firebase, etc.)
