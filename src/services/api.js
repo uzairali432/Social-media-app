@@ -38,8 +38,11 @@ api.interceptors.response.use(
           refreshToken,
         });
 
-        const { token } = response.data;
+        const { token, refreshToken: newRefreshToken } = response.data;
         localStorage.setItem('authToken', token);
+        if (newRefreshToken) {
+          localStorage.setItem('refreshToken', newRefreshToken);
+        }
 
         originalRequest.headers.Authorization = `Bearer ${token}`;
         return api(originalRequest);
@@ -59,7 +62,7 @@ api.interceptors.response.use(
 export const authAPI = {
   signup: (userData) => api.post('/auth/signup', userData),
   login: (email, password) => api.post('/auth/login', { email, password }),
-  logout: () => api.post('/auth/logout'),
+  logout: () => api.post('/auth/logout', { refreshToken: localStorage.getItem('refreshToken') }),
   refreshToken: (refreshToken) => api.post('/auth/refresh', { refreshToken }),
   getCurrentUser: () => api.get('/auth/me'),
 };

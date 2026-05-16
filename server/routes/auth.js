@@ -2,7 +2,8 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import { authMiddleware, generateTokens } from '../middleware/auth.js';
+import RefreshToken from '../models/RefreshToken.js';
+import { authMiddleware, generateTokens, hashToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -53,7 +54,7 @@ router.post(
       await user.save();
 
       // Generate tokens
-      const { token, refreshToken } = generateTokens(user._id);
+      const { token, refreshToken } = await generateTokens(user._id);
 
       res.status(201).json({
         message: 'User registered successfully',
@@ -102,7 +103,7 @@ router.post(
       }
 
       // Generate tokens
-      const { token, refreshToken } = generateTokens(user._id);
+      const { token, refreshToken } = await generateTokens(user._id);
 
       res.json({
         message: 'Login successful',
@@ -123,7 +124,7 @@ router.post(
 );
 
 // Refresh Token
-router.post('/refresh', (req, res) => {
+router.post('/refresh', async (req, res) => {
   try {
     const { refreshToken } = req.body;
 
@@ -132,7 +133,49 @@ router.post('/refresh', (req, res) => {
     }
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    const { token, refreshToken: newRefreshToken } = generateTokens(decoded.userId);
+
+    if (decoded.type !== 'refresh' || !decoded.tokenId) {
+      return res.status(401).json({ message: 'Invalid refresh token' });
+    }
+
+    const existingToken = await RefreshToken.findOne({
+      user: decoded.userId,
+      tokenId: decoded.tokenId,
+      tokenHash: hashToken(refreshToken),
+    });
+
+    if (!existingToken) {
+      return res.status(401).json({ message: 'Invalid refresh token' });
+    }
+
+    if (existingToken.revokedAt) {
+      await RefreshToken.updateMany(
+        { user: decoded.userId, revokedAt: null },
+        {
+          $set: {
+            revokedAt: new Date(),
+            revokedReason: 'reuse_detected',
+          },
+        }
+      );
+
+      return res.status(401).json({ message: 'Refresh token has been revoked' });
+    }
+
+    if (existingToken.expiresAt <= new Date()) {
+      return res.status(401).json({ message: 'Refresh token expired' });
+    }
+
+    const {
+      token,
+      refreshToken: newRefreshToken,
+      tokenId: newTokenId,
+    } = await generateTokens(decoded.userId);
+
+    existingToken.revokedAt = new Date();
+    existingToken.revokedReason = 'rotated';
+    existingToken.replacedByTokenId = newTokenId;
+    await existingToken.save();
 
     res.json({
       token,
@@ -170,8 +213,33 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 // Logout
-router.post('/logout', authMiddleware, (req, res) => {
+router.post('/logout', async (req, res) => {
   try {
+    const { refreshToken } = req.body || {};
+
+    if (refreshToken) {
+      const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, {
+        ignoreExpiration: true,
+      });
+
+      if (decoded.type === 'refresh' && decoded.tokenId) {
+        await RefreshToken.findOneAndUpdate(
+          {
+            user: decoded.userId,
+            tokenId: decoded.tokenId,
+            tokenHash: hashToken(refreshToken),
+            revokedAt: null,
+          },
+          {
+            $set: {
+              revokedAt: new Date(),
+              revokedReason: 'logout',
+            },
+          }
+        );
+      }
+    }
+
     res.json({ message: 'Logged out successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });

@@ -1,6 +1,10 @@
 const AuthReducer = (state, action) => {
     switch (action.type) {
         case 'CREATE_ACCOUNT':
+            localStorage.setItem("authToken", action.payload.token);
+            if (action.payload.refreshToken) {
+                localStorage.setItem("refreshToken", action.payload.refreshToken);
+            }
             return {
                 ...state,
                 userId: action.payload.userId,

@@ -1,4 +1,12 @@
 import jwt from 'jsonwebtoken';
+import { createHash, randomUUID } from 'crypto';
+import RefreshToken from '../models/RefreshToken.js';
+
+const REFRESH_TOKEN_TYPE = 'refresh';
+
+export const hashToken = (token) => {
+  return createHash('sha256').update(token).digest('hex');
+};
 
 export const authMiddleware = (req, res, next) => {
   try {
@@ -20,18 +28,27 @@ export const authMiddleware = (req, res, next) => {
   }
 };
 
-export const generateTokens = (userId) => {
+export const generateTokens = async (userId) => {
   const token = jwt.sign(
     { userId },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRE }
   );
 
+  const tokenId = randomUUID();
   const refreshToken = jwt.sign(
-    { userId },
+    { userId, tokenId, type: REFRESH_TOKEN_TYPE },
     process.env.JWT_REFRESH_SECRET,
     { expiresIn: process.env.JWT_REFRESH_EXPIRE }
   );
 
-  return { token, refreshToken };
+  const decodedRefreshToken = jwt.decode(refreshToken);
+  await RefreshToken.create({
+    user: userId,
+    tokenId,
+    tokenHash: hashToken(refreshToken),
+    expiresAt: new Date(decodedRefreshToken.exp * 1000),
+  });
+
+  return { token, refreshToken, tokenId };
 };
