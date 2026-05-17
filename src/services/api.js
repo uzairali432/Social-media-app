@@ -75,6 +75,7 @@ export const postsAPI = {
   updatePost: (postId, postData) => api.put(`/posts/${postId}`, postData),
   likePost: (postId) => api.post(`/posts/${postId}/like`),
   unlikePost: (postId) => api.post(`/posts/${postId}/unlike`),
+  commentPost: (postId, text) => api.post(`/posts/${postId}/comments`, { text }),
 };
 
 // Users API calls

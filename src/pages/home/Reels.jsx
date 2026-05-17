@@ -3,10 +3,12 @@ import { ThumbsUp, MessageCircle, Share2, MoreHorizontal, RefreshCcw } from "luc
 import userImage from "../../assets/user.png";
 import LeftSidebar from "../../components/home/LeftSidebar";
 import axios from "axios";
+import { EmptyState, ErrorState, FeedSkeleton } from "../../components/common/UiStates";
 
 const Reels = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [like, setLike] = useState(false)
 
   const handleLike = () => {
@@ -14,6 +16,7 @@ const Reels = () => {
   }
   const fetchVideos = async () => {
     try {
+      setError("");
       setLoading(true);
       const randomPage = Math.floor(Math.random() * 5) + 1;
 
@@ -24,6 +27,7 @@ const Reels = () => {
       setVideos(res.data.hits);
     } catch (err) {
       console.error("Error fetching videos:", err);
+      setError("We could not load videos right now.");
     } finally {
       setLoading(false);
     }
@@ -48,9 +52,11 @@ const Reels = () => {
 
         <div className="flex-1 ml-[100px] max-w-2xl mx-auto space-y-6">
           {loading ? (
-            <p className="text-center text-gray-500">Fetching new videos...</p>
+            <FeedSkeleton count={2} />
+          ) : error && videos.length === 0 ? (
+            <ErrorState title="Videos unavailable" description={error} onRetry={fetchVideos} />
           ) : videos.length === 0 ? (
-            <p className="text-center text-gray-500">No videos found.</p>
+            <EmptyState title="No videos found" description="Try fetching a fresh set of clips from the discovery feed." actionLabel="Load videos" onAction={fetchVideos} />
           ) : (
             videos.map((video) => (
               <div

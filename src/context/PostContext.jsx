@@ -2,7 +2,9 @@ import { createContext, useContext, useReducer } from "react";
 import reducer from '../reducer/PostReducer'
 
 const defaultValue = {
-    post: []
+    post: [],
+    loading: true,
+    error: null,
 }
 const PostContext = createContext(defaultValue);
 

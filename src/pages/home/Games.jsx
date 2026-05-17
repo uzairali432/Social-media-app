@@ -2,14 +2,23 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Play } from "lucide-react";
 import LeftSidebar from "../../components/home/LeftSidebar";
+import { ErrorState, GridSkeleton, EmptyState } from "../../components/common/UiStates";
 
 const Games = () => {
   const [games, setGames] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   useEffect(() => {
+    setLoading(true);
+    setError("");
     axios
       .get(`https://pixabay.com/api/?key=${import.meta.env.VITE_PIXABAY_API_KEY}&q=video+games&image_type=photo&per_page=12`)
       .then((response) => setGames(response.data.hits))
-      .catch((error) => console.error("Error fetching games:", error));
+      .catch((error) => {
+        console.error("Error fetching games:", error);
+        setError("We could not load games right now.");
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -17,7 +26,14 @@ const Games = () => {
       <LeftSidebar />
       <div className="flex-1 p-6 bg-gray-100 min-h-screen">
         <h2 className="text-2xl font-bold mb-6">Recommended Games</h2>
-        <div className="grid grid-cols-3 gap-5">
+        {loading ? (
+          <GridSkeleton count={6} columns="grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5" />
+        ) : error && games.length === 0 ? (
+          <ErrorState title="Games unavailable" description={error} onRetry={() => window.location.reload()} />
+        ) : games.length === 0 ? (
+          <EmptyState title="No games to show" description="Refresh the page to try loading another batch of recommendations." />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
           {games.map((game) => (
             <div
               key={game.id}
@@ -41,7 +57,8 @@ const Games = () => {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

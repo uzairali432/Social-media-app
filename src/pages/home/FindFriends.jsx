@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import LeftSidebar from "../../components/home/LeftSidebar";
+import { EmptyState, ErrorState, ListSkeleton } from "../../components/common/UiStates";
 
 const FindFriends = () => {
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchFriends = async () => {
       try {
+        setError("");
         const response = await axios.get(
           `https://pixabay.com/api/?key=${import.meta.env.VITE_PIXABAY_API_KEY}&q=portrait+people&image_type=photo&per_page=12`
         );
@@ -23,6 +26,7 @@ const FindFriends = () => {
         setFriends(formatted);
       } catch (error) {
         console.error("Error fetching friends:", error);
+        setError("We could not load friend suggestions right now.");
       } finally {
         setLoading(false);
       }
@@ -54,10 +58,14 @@ const FindFriends = () => {
           </button>
         </div>
 
-        {loading && (
-          <div className="text-center text-gray-500 mt-10">
-            Loading friend suggestions...
-          </div>
+        {loading && <ListSkeleton count={8} />}
+
+        {!loading && error && friends.length === 0 && (
+          <ErrorState title="Friend suggestions unavailable" description={error} onRetry={() => window.location.reload()} />
+        )}
+
+        {!loading && !error && friends.length === 0 && (
+          <EmptyState title="No friend requests" description="You’re all caught up on pending suggestions." />
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
@@ -94,10 +102,6 @@ const FindFriends = () => {
                 </div>
               </div>
             ))}
-
-          {!loading && friends.length === 0 && (
-            <p className="text-gray-500 text-sm">No more friend requests</p>
-          )}
         </div>
       </div>
     </div>

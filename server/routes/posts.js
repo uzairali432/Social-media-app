@@ -122,4 +122,47 @@ router.post('/:postId/unlike', authMiddleware, async (req, res) => {
   }
 });
 
+// Comment on post
+router.post(
+  '/:postId/comments',
+  authMiddleware,
+  [body('text').trim().notEmpty().withMessage('Comment text is required')],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { text } = req.body;
+      const post = await Post.findById(req.params.postId);
+
+      if (!post) {
+        return res.status(404).json({ message: 'Post not found' });
+      }
+
+      post.comments.push({
+        author: req.userId,
+        text,
+      });
+
+      await post.save();
+
+      await post.populate([
+        { path: 'author', select: 'firstName surName profilePicture' },
+        { path: 'comments.author', select: 'firstName surName profilePicture' },
+        { path: 'likes', select: 'firstName surName' },
+      ]);
+
+      res.status(201).json({
+        message: 'Comment added successfully',
+        post,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error', error: error.message });
+    }
+  }
+);
+
 export default router;

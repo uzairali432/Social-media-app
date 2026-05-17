@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import userImage from '../../assets/user.png'
 import { useAuthContext } from "../../context/AuthContext";
+import { usePostContext } from "../../context/PostContext";
+import { postsAPI } from "../../services/api";
 
 import {
   Card,
@@ -42,8 +44,6 @@ const style = {
 import { styled } from '@mui/material/styles';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
-import { usePostContext } from "../../context/PostContext";
-
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
   clipPath: 'inset(50%)',
@@ -62,24 +62,77 @@ const CreatePost = () => {
   const [open, setOpen] = useState(false);
   const [audience, setAudience] = useState("Friends");
   const [files, setFiles] = useState([])
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const { state } = useAuthContext();
   const { firstName, surName } = state;
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const { dispatch: postDispatch } = usePostContext();
 
-  const handleClick = () => {
-    const data = {
-      id: Math.floor(Math.random() * 897264),
-      postText,
-      files,
+  const previewFiles = useMemo(() => files, [files]);
+
+  const handleClick = async () => {
+    const trimmedText = postText.trim();
+    if (!trimmedText) {
+      setErrorMessage('Write something before posting');
+      return;
+    }
+
+    const tempId = `temp-post-${Date.now()}`;
+    const optimisticPost = {
+      id: tempId,
+      kind: 'local',
+      createdBy: `${firstName} ${surName}`.trim() || 'You',
       createdAt: new Date().toLocaleString(),
-      createdBy: `${firstName} ${surName}`
+      postText: trimmedText,
+      files: previewFiles,
+      likes: [],
+      likesCount: 0,
+      likedByMe: false,
+      comments: [],
+      commentsCount: 0,
+      optimistic: true,
     };
-    postDispatch({ type: "ADD_POST", payload: data })
-    setOpen(false)
-    setFiles([]);
-    setPostText("")
+
+    postDispatch({ type: 'ADD_POST_OPTIMISTIC', payload: optimisticPost });
+    setIsSubmitting(true);
+    setErrorMessage('');
+
+    try {
+      const response = await postsAPI.createPost({ content: trimmedText });
+      const createdPost = response.data.post;
+
+      postDispatch({
+        type: 'CONFIRM_POST',
+        payload: {
+          tempId,
+          post: {
+            id: createdPost._id,
+            kind: 'server',
+            createdBy: `${createdPost.author?.firstName || firstName} ${createdPost.author?.surName || surName}`.trim(),
+            createdAt: new Date(createdPost.createdAt).toLocaleString(),
+            postText: createdPost.content,
+            files: previewFiles,
+            likes: createdPost.likes || [],
+            likesCount: createdPost.likes?.length || 0,
+            likedByMe: false,
+            comments: createdPost.comments || [],
+            commentsCount: createdPost.comments?.length || 0,
+            optimistic: false,
+          },
+        },
+      });
+
+      setOpen(false);
+      setFiles([]);
+      setPostText("");
+    } catch (error) {
+      postDispatch({ type: 'REMOVE_POST', payload: tempId });
+      setErrorMessage(error.response?.data?.message || 'Unable to create post right now');
+    } finally {
+      setIsSubmitting(false);
+    }
 
   }
 
@@ -142,14 +195,20 @@ const CreatePost = () => {
                   />
                 </div>
               </CardContent>
-              {true && <ImageList sx={{ width: 500, height: 100 }}>
+              {previewFiles.length > 0 && <ImageList sx={{ width: 500, height: 100 }}>
                 {files.map((item) => (
-                  <ImageListItem>
+                  <ImageListItem key={item.name + item.size}>
                     <img src={URL.createObjectURL(item)} alt="" />
                   </ImageListItem>
                 ))}
               </ImageList>}
             </div>
+
+            {errorMessage && (
+              <div className="mx-4 mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {errorMessage}
+              </div>
+            )}
 
 
             {/* Add to your post */}
@@ -196,6 +255,7 @@ const CreatePost = () => {
                 onClick={handleClick}
                 fullWidth
                 variant="contained"
+                disabled={isSubmitting}
                 sx={{
                   backgroundColor: "#1877f2",
                   textTransform: "none",
@@ -205,7 +265,7 @@ const CreatePost = () => {
                 }}
 
               >
-                Post
+                {isSubmitting ? 'Posting...' : 'Post'}
               </Button>
             </div>
           </Card>

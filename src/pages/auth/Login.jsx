@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form";
 import { useAuthContext } from "../../context/AuthContext";
 import { useState } from "react";
 import { authAPI } from "../../services/api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema } from "../../validation/authSchemas";
 
 const Login = () => {
   const { dispatch } = useAuthContext()
@@ -13,7 +15,14 @@ const Login = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    mode: "onBlur",
+    resolver: zodResolver(loginSchema),
+  });
 
   const onSubmit = async (data) => {
     try {

@@ -1,17 +1,26 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import LeftSidebar from "../../components/home/LeftSidebar";
+import { EmptyState, ErrorState, GridSkeleton } from "../../components/common/UiStates";
 
 const Marketplace = () => {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    setLoading(true);
+    setError("");
     axios
       .get(`https://pixabay.com/api/?key=${import.meta.env.VITE_PIXABAY_API_KEY}&q=shopping&image_type=photo&per_page=12`)
       .then((res) => {
         setProducts(res.data.hits);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+        setError("We could not load marketplace picks right now.");
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -26,7 +35,14 @@ const Marketplace = () => {
             + Create Listing
           </button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {loading ? (
+          <GridSkeleton count={8} columns="grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" />
+        ) : error && products.length === 0 ? (
+          <ErrorState title="Marketplace unavailable" description={error} onRetry={() => window.location.reload()} />
+        ) : products.length === 0 ? (
+          <EmptyState title="No listings yet" description="Browse again later for new marketplace picks." />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {products.map((item) => (
             <div
               key={item.id}
@@ -46,7 +62,8 @@ const Marketplace = () => {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
