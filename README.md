@@ -1,129 +1,149 @@
 # Social Media App
 
-A social media web application built with React and Vite.  
-This project provides a clean, scalable frontend structure for building a modern social media platform with real-world UI patterns.
+Full-stack social media application with a React + Vite frontend and a Node.js + Express + MongoDB backend.
 
----
+## Overview
 
-## 🚀 Features
+This project includes:
+- User authentication with JWT access and refresh tokens
+- Feed-style post creation and listing
+- Like and unlike interactions
+- User profile and follow/unfollow APIs
+- Frontend routing and protected pages
 
-- Modern and responsive user interface  
-- Component-based architecture using React  
-- Clean and scalable folder structure  
-- Routing and page layout support  
-- Reusable UI components  
-- Ready for backend and API integration  
-- Facebook clone 
+## Tech Stack
 
-Note: This project is currently focused on the frontend only. Backend features like authentication, posts, likes, and comments can be added later.
+Frontend:
+- React 19
+- Vite
+- React Router
+- Axios
+- MUI + Ant Design
 
----
-
-## 🛠 Tech Stack
-
-Frontend: React  
-Build Tool: Vite  
-Language: JavaScript (ES6+)  
-Styling: CSS  
-Package Manager: npm  
-
----
-
-## 📁 Project Structure
-
-Social-media-app/  
-├── public/  
-├── src/  
-│   ├── assets/  
-│   ├── components/  
-│   ├── pages/  
-│   ├── routes/  
-│   ├── App.jsx  
-│   └── main.jsx  
-├── index.html  
-├── package.json  
-├── vite.config.js  
-└── README.md  
-
----
-
-## 💻 Getting Started
-
-### Prerequisites
-
+Backend:
 - Node.js
-- npm installed
+- Express
+- MongoDB + Mongoose
+- JWT (jsonwebtoken)
+- bcryptjs
 
----
+## Project Structure
 
-### Installation
+```text
+Social-media-app/
+|-- src/                    # Frontend app
+|   |-- components/
+|   |-- context/
+|   |-- pages/
+|   |-- routes/
+|   `-- services/api.js
+|-- server/                 # Backend API
+|   |-- middleware/
+|   |-- models/
+|   |-- routes/
+|   |-- index.js
+|   `-- README.md
+|-- public/
+|-- package.json
+`-- README.md
+```
 
-Clone the repository  
-git clone https://github.com/uzairali432/Social-media-app.git  
+## Prerequisites
 
-Navigate to the project directory  
-cd Social-media-app  
+- Node.js 18+
+- npm
+- MongoDB (local, Docker, or Atlas)
 
-Install dependencies  
-npm install  
+## Quick Start
 
----
+1. Install frontend dependencies from the project root:
 
-## ▶️ Running the App
+```bash
+npm install
+```
 
-Start the development server  
-npm run dev  
+2. Install backend dependencies:
 
-Open your browser and visit  
-http://localhost:5173  
+```bash
+cd server
+npm install
+```
 
----
+3. Configure backend environment in `server/.env`:
 
-## 📦 Production Build
+```env
+MONGODB_URI=mongodb://localhost:27017/social-media-app
+JWT_SECRET=change_me_access_secret
+JWT_REFRESH_SECRET=change_me_refresh_secret
+JWT_EXPIRE=15m
+JWT_REFRESH_EXPIRE=7d
+PORT=5000
+NODE_ENV=development
+```
 
-To build the app for production  
-npm run build  
+4. Configure frontend environment in `.env` at the project root:
 
-The optimized output will be generated in the dist/ folder.
+```env
+VITE_API_URL=http://localhost:5000/api
+VITE_PIXABAY_API_KEY=your_pixabay_api_key
+```
 
----
+5. Start backend (terminal 1):
 
-## 🔌 Backend Integration
+```bash
+cd server
+npm run dev
+```
 
-To convert this into a full social media platform:
-- Connect a backend (Node.js, Express, MongoDB, Firebase, etc.)
-- Add authentication (JWT / OAuth)
-- Implement posts, likes, comments, and followers
-- Store API URLs using environment variables
+6. Start frontend (terminal 2):
 
-Example environment variable  
-VITE_API_URL=http://localhost:5000/api  
+```bash
+npm run dev
+```
 
----
+7. Open the app:
 
-## 🤝 Contributing
+- Frontend: http://localhost:5173
+- Backend health: http://localhost:5000/api/health
 
-Contributions are welcome.
+## Available Scripts
 
-1. Fork the repository  
-2. Create a new branch  
-3. Commit your changes  
-4. Push to your fork  
-5. Open a Pull Request  
+Frontend (project root):
+- `npm run dev` - Start Vite dev server
+- `npm run build` - Build production bundle
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
----
+Backend (`server/`):
+- `npm run dev` - Start API with nodemon
+- `npm start` - Start API with node
 
-## 📄 License
+## API Base URL
 
-This project is licensed under the MIT License.
+Set frontend API target with:
 
----
+```env
+VITE_API_URL=http://localhost:5000/api
+```
 
-## ⭐ Author
+The frontend service layer expects:
+- `/auth/*`
+- `/posts/*`
+- `/users/*`
 
-Uzair Ali  
-GitHub: https://github.com/uzairali432  
+## Notes
 
----
+- Do not commit real secrets or database credentials.
+- Rotate JWT secrets for production deployments.
+- Update CORS and environment settings before deploying.
 
-Feel free to customize and extend this project into a complete social media application.
+## Documentation
+
+- Backend details: `server/README.md`
+- Setup checklist: `GETTING_STARTED.md`
+- Troubleshooting: `TROUBLESHOOTING.md`
+- JWT migration details: `JWT_MIGRATION_GUIDE.md`
+
+## License
+
+MIT
