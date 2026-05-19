@@ -144,6 +144,3 @@ The frontend service layer expects:
 - Troubleshooting: `TROUBLESHOOTING.md`
 - JWT migration details: `JWT_MIGRATION_GUIDE.md`
 
-## License
-
-MIT
