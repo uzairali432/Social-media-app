@@ -1,75 +1,46 @@
+
 # Social Media App
 
-Full-stack social media application with a React + Vite frontend and a Node.js + Express + MongoDB backend.
+Lightweight full-stack social media application with a Vite + React frontend and a Node.js + Express + MongoDB backend.
 
-## Overview
+## What This Repo Contains
 
-This project includes:
-- User authentication with JWT access and refresh tokens
-- Feed-style post creation and listing
-- Like and unlike interactions
-- User profile and follow/unfollow APIs
-- Frontend routing and protected pages
+- Frontend: React (Vite) app in `src/` with routing, contexts, and UI components.
+- Backend: Express API in `server/` with auth, posts, and user routes.
+- Utilities: shared constants, validation schemas, and helpers.
+
+## Key Features
+
+- JWT-based authentication (access + refresh tokens)
+- Create, edit, and list posts (feed-style)
+- Like/unlike posts
+- Follow/unfollow users and basic profile APIs
+- Protected routes on the frontend
 
 ## Tech Stack
 
-Frontend:
-- React 19
-- Vite
-- React Router
-- Axios
-- MUI + Ant Design
+- Frontend: React, Vite, React Router, Axios, MUI/Ant Design
+- Backend: Node.js, Express, MongoDB (Mongoose), jsonwebtoken, bcryptjs
 
-Backend:
-- Node.js
-- Express
-- MongoDB + Mongoose
-- JWT (jsonwebtoken)
-- bcryptjs
+## Quick Setup
 
-## Project Structure
+Follow these steps to run the app locally. The commands assume Windows PowerShell or a POSIX shell where noted.
 
-```text
-Social-media-app/
-|-- src/                    # Frontend app
-|   |-- components/
-|   |-- context/
-|   |-- pages/
-|   |-- routes/
-|   `-- services/api.js
-|-- server/                 # Backend API
-|   |-- middleware/
-|   |-- models/
-|   |-- routes/
-|   |-- index.js
-|   `-- README.md
-|-- public/
-|-- package.json
-`-- README.md
-```
+1) Install dependencies (project root)
 
-## Prerequisites
-
-- Node.js 18+
-- npm
-- MongoDB (local, Docker, or Atlas)
-
-## Quick Start
-
-1. Install frontend dependencies from the project root:
-
-```bash
+```powershell
 npm install
 ```
 
-2. Install backend dependencies:
+2) Install backend deps and create env (server)
 
-```bash
+```powershell
 cd server
 npm install
+copy NUL .env  # Windows: creates empty .env file
 ```
 
-3. Configure backend environment in `server/.env`:
+Create `server/.env` with at minimum:
 
 ```env
 MONGODB_URI=mongodb://localhost:27017/social-media-app
@@ -81,66 +52,79 @@ PORT=5000
 NODE_ENV=development
 ```
 
-4. Configure frontend environment in `.env` at the project root:
+3) Create frontend env (project root)
+
+```powershell
+copy NUL .env
+```
+
+Add to the project root `.env`:
 
 ```env
 VITE_API_URL=http://localhost:5000/api
 VITE_PIXABAY_API_KEY=your_pixabay_api_key
 ```
 
-5. Start backend (terminal 1):
+4) Run the backend
 
-```bash
+```powershell
 cd server
 npm run dev
 ```
 
-6. Start frontend (terminal 2):
+5) Run the frontend (from project root)
 
-```bash
+```powershell
 npm run dev
 ```
 
-7. Open the app:
+6) Open the app
 
 - Frontend: http://localhost:5173
-- Backend health: http://localhost:5000/api/health
+- API health: http://localhost:5000/api/health
 
-## Available Scripts
+## NPM Scripts
 
-Frontend (project root):
-- `npm run dev` - Start Vite dev server
-- `npm run build` - Build production bundle
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+- `npm run dev` — Start frontend Vite dev server (project root)
+- `npm run build` — Build frontend for production
+- `npm run preview` — Preview built frontend
+- `npm run lint` — Run ESLint
 
-Backend (`server/`):
-- `npm run dev` - Start API with nodemon
-- `npm start` - Start API with node
+Backend (`server/`) scripts:
+- `npm run dev` — Start Express server with `nodemon`
+- `npm start` — Start Express server with `node`
 
-## API Base URL
+## Environment Variables (summary)
 
-Set frontend API target with:
+- Server: `server/.env`
+	- `MONGODB_URI` — MongoDB connection string
+	- `JWT_SECRET`, `JWT_REFRESH_SECRET` — secrets for tokens
+	- `JWT_EXPIRE`, `JWT_REFRESH_EXPIRE` — token lifetimes
+	- `PORT` — backend port (default 5000)
 
-```env
-VITE_API_URL=http://localhost:5000/api
-```
+- Frontend: project root `.env`
+	- `VITE_API_URL` — API base URL (e.g. `http://localhost:5000/api`)
+	- `VITE_PIXABAY_API_KEY` — optional image provider key
 
-The frontend service layer expects:
-- `/auth/*`
-- `/posts/*`
-- `/users/*`
+## Development Notes
 
-## Notes
+- Do not commit real secrets. Use CI/CD or secret management for production.
+- Rotate JWT secrets and review token lifetimes before deployment.
+- Confirm CORS settings in `server/index.js` when deploying cross-origin.
 
-- Do not commit real secrets or database credentials.
-- Rotate JWT secrets for production deployments.
-- Update CORS and environment settings before deploying.
+## Useful Links
 
-## Documentation
+- Backend README: [server/README.md](server/README.md)
+- Setup checklist: [GETTING_STARTED.md](GETTING_STARTED.md)
+- Troubleshooting: [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+- JWT migration guide: [JWT_MIGRATION_GUIDE.md](JWT_MIGRATION_GUIDE.md)
 
-- Backend details: `server/README.md`
-- Setup checklist: `GETTING_STARTED.md`
-- Troubleshooting: `TROUBLESHOOTING.md`
-- JWT migration details: `JWT_MIGRATION_GUIDE.md`
+## Contributing
+
+Contributions are welcome. Create issues or PRs, follow existing code style, and add tests where applicable.
+
+## License
+
+See the project `LICENSE`.
+
 
