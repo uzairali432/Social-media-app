@@ -11,7 +11,7 @@ import {
   Bell,
   ChevronDown,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
 import userImage from '../assets/user.png';
 import { Button, Popconfirm } from "antd";
@@ -29,6 +29,9 @@ const Header = () => {
   const { state } = useAuthContext();
   const { firstName, surName, email} = state;
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [open, setOpen] = useState(false);
 
@@ -47,6 +50,14 @@ const Header = () => {
           <Search className="text-gray-500 w-4 h-4 mr-2" />
           <input
             type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const q = (searchTerm || '').trim();
+                if (q) navigate(`/search?q=${encodeURIComponent(q)}`);
+              }
+            }}
             placeholder="Search Facebook"
             className="bg-transparent outline-none text-sm w-32 md:w-48"
           />

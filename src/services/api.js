@@ -76,6 +76,7 @@ export const postsAPI = {
   likePost: (postId) => api.post(`/posts/${postId}/like`),
   unlikePost: (postId) => api.post(`/posts/${postId}/unlike`),
   commentPost: (postId, text) => api.post(`/posts/${postId}/comments`, { text }),
+  searchPosts: (query) => api.get(`/posts/search?q=${encodeURIComponent(query)}`),
 };
 
 // Users API calls

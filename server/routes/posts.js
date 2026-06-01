@@ -22,6 +22,30 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Search posts
+router.get('/search', async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q) {
+      return res.status(400).json({ message: 'Search query is required' });
+    }
+
+    const posts = await Post.find({
+      content: { $regex: q, $options: 'i' },
+    })
+      .populate('author', 'firstName surName profilePicture')
+      .populate('comments.author', 'firstName surName profilePicture')
+      .limit(20)
+      .sort({ createdAt: -1 });
+
+    res.json(posts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 // Create post
 router.post(
   '/',
