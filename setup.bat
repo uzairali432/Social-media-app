@@ -26,6 +26,9 @@ if not exist ".env" (
         echo JWT_REFRESH_EXPIRE=7d
         echo PORT=5000
         echo NODE_ENV=development
+        echo CLOUDINARY_CLOUD_NAME=your_cloud_name_here
+        echo CLOUDINARY_API_KEY=your_api_key_here
+        echo CLOUDINARY_API_SECRET=your_api_secret_here
     ) > .env
     echo Created .env with defaults. Please update JWT secrets!
 )
