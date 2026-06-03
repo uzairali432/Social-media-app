@@ -45,14 +45,14 @@ npm install
 
 ### 2) Configure environment variables
 
-Create `/tmp/workspace/uzairali432/Social-media-app/.env`:
+Create `.env` in the project root:
 
 ```env
 VITE_API_URL=http://localhost:5000/api
 VITE_PIXABAY_API_KEY=your_pixabay_api_key
 ```
 
-Create `/tmp/workspace/uzairali432/Social-media-app/server/.env`:
+Create `server/.env`:
 
 ```env
 MONGODB_URI=mongodb://localhost:27017/social-media-app
@@ -140,4 +140,3 @@ From `server/`:
 ## License
 
 See [LICENSE](LICENSE).
-
