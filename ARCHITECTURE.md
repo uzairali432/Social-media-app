@@ -1,6 +1,6 @@
 # JWT Authentication Architecture
 
-## System Architecture
+## System Architectur
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
